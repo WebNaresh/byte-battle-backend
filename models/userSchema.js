@@ -2,40 +2,40 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Please Enter Your name"],
-    maxLength: [30, "name cannot exceed 30 characters"],
-    minLength: [4, "name should have more than 4 characters"],
-    unique: true,
+const User = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Please Enter Your name"],
+      maxLength: [30, "name cannot exceed 30 characters"],
+      minLength: [4, "name should have more than 4 characters"],
+      unique: true,
+    },
+    email: {
+      type: String,
+      required: [true, "Please Enter E-mail"],
+      validate: [validator.isEmail, "Please fill a valid email address"],
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: [true, "Please Enter Password"],
+    },
+    phoneNo: {
+      type: String,
+      required: [true, "Please Enter phone no"],
+    },
+    type: {
+      type: String,
+      required: [true, "Enter type of user"],
+    },
+    address: {
+      type: String,
+      required: [true, "Enter address"],
+    },
   },
-  email: {
-    type: String,
-    required: [true, "Please Enter E-mail"],
-    validate: [validator.isEmail, "Please fill a valid email address"],
-  },
-  userImage: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: [true, "Please Enter Password"],
-  },
-  msgCondition: {
-    type: String,
-    default: "progress",
-  },
-  lastMessage: {
-    type: String,
-    default: "",
-  },
-  lastMessageTime: {
-    type: String,
-    default: "",
-  },
-});
+  { timestamps: true }
+);
 
 User.pre("save", async function (next) {
   if (!this.isModified("password")) {
@@ -57,4 +57,5 @@ User.methods.getJWTToken = function () {
   });
 };
 
-module.exports = mongoose.model("User", User);
+const UserModel = mongoose.model("User", User);
+module.exports = { UserModel };
