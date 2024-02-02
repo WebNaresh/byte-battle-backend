@@ -11,6 +11,10 @@ exports.test = catchAssyncError(async (req, res, next) => {
 
 exports.register = catchAssyncError(async (req, res, next) => {
   const { name, email, password, phoneNo, type, address } = req.body;
+  console.log(
+    `🚀 ~ file: userController.js:14 ~ { name, email, password, phoneNo, type, address }:`,
+    { name, email, password, phoneNo, type, address }
+  );
   const existed = await UserModel.findOne({ email });
   if (!name || !email || !password || !phoneNo || !type || !address) {
     return res.status(400).json({
@@ -22,7 +26,8 @@ exports.register = catchAssyncError(async (req, res, next) => {
     existed.password = null;
     return res.status(400).json({
       success: false,
-      message: "User is already registerd",
+      message:
+        "User is already registerd please go to login page and login with credentails",
     });
   } else {
     const user = await UserModel.create({
