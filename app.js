@@ -15,6 +15,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/route", user);
 app.use("/route", foodItem);
 app.use("/route", notification);
+app.get("/", (req, res) => {
+  res.send("Welcome to the homepage!");
+});
 app.use(error);
 module.exports = app;
 // npm i express cookie-parser body-parser bcryptjs
