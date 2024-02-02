@@ -1,8 +1,11 @@
 // testController a UserModel
+const { send } = require("@emailjs/browser");
 const catchAssyncError = require("../middleware/catchAssyncError");
 const { FoodItemModel } = require("../models/foodItem");
 const { NotificationModel } = require("../models/notification");
+const { UserModel } = require("../models/userSchema");
 const { checkRequiredFields } = require("../utils/required-field");
+const { sendEmail } = require("../utils/sendEmail");
 
 exports.createFoodItem = catchAssyncError(async (req, res, next) => {
   try {
@@ -23,17 +26,26 @@ exports.createFoodItem = catchAssyncError(async (req, res, next) => {
       "items",
     ]);
 
+    var inputDate = new Date(dateOfCreation);
+    var resultDate = new Date(
+      inputDate.getTime() + Number(shelfLife) * 24 * 60 * 60 * 1000
+    );
     const newFoodItem = await new FoodItemModel({
       name,
       serving_size,
       description,
       dateOfCreation,
       supplier: req.user._id,
-      shelfLife,
+      shelfLife: resultDate,
       items,
     });
-    await newFoodItem.save();
+    (await newFoodItem.save()).populate("supplier");
 
+    const user = await UserModel.find({ type: "Consumer" });
+    console.log(`🚀 ~ file: foodItem.js:44 ~ user:`, user);
+    user.map((doc) => {
+      sendEmail(doc.email);
+    });
     res
       .status(201)
       .json({ status: true, message: "Food is created successfully" });
@@ -48,7 +60,7 @@ exports.getFoodItem = catchAssyncError(async (req, res, next) => {
   try {
     const foodItems = await FoodItemModel.find({ supplier: req.user._id });
 
-    res.status(201).json({ foodItems, success: true });
+    res.status(201).json({ foodItems: foodItems.reverse(), success: true });
   } catch (error) {
     console.error("Error creating FoodItem:", error);
     res.status(500).json({ error: "Internal Server Error", success: false });
@@ -56,8 +68,10 @@ exports.getFoodItem = catchAssyncError(async (req, res, next) => {
 });
 exports.getFoodItemsGlobal = catchAssyncError(async (req, res, next) => {
   try {
+    const currentDate = new Date();
     const foodItems = await FoodItemModel.find({
       serving_size: { $gt: 0 },
+      shelfLife: { $gte: currentDate },
     });
     foodItems.reverse();
 
@@ -98,6 +112,7 @@ exports.getFood = catchAssyncError(async (req, res, next) => {
       creator: req.user._id,
       acceptor: foodItems.supplier,
       foodItemId: foodItems._id,
+      quantity,
     });
     console.log(`🚀 ~ file: foodItem.js:42 ~ not:`, not);
     await not.save();

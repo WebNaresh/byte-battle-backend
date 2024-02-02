@@ -1,20 +1,20 @@
 const nodemailer = require("nodemailer");
 
-module.exports = async (email, subject, htmlContent, user, token) => {
+const sendEmail = async (email) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.USEREMAIL,
-        pass: process.env.PASS,
+        user: process.env.EMAIL,
+        pass: process.env.APP_PASSWORD,
       },
     });
 
     const info = await transporter.sendMail({
-      from: process.env.USEREMAIL,
+      from: process.env.EMAIL,
       to: email,
-      subject: subject,
-      html: htmlContent,
+      subject: `From सहाय्य भोजन`,
+      html: `You have food near you, please visit <a href="${process.env.BASE_URL}">our website</a>.`,
     });
 
     console.log("Email sent:", info.messageId);
@@ -24,3 +24,4 @@ module.exports = async (email, subject, htmlContent, user, token) => {
     throw error;
   }
 };
+module.exports = { sendEmail };

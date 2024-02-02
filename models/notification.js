@@ -19,6 +19,10 @@ const Notification = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    quantity: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );

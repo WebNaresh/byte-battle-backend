@@ -16,6 +16,7 @@ exports.register = catchAssyncError(async (req, res, next) => {
     { name, email, password, phoneNo, type, address }
   );
   const existed = await UserModel.findOne({ email });
+  console.log(`🚀 ~ file: userController.js:19 ~ existed:`, existed);
   if (!name || !email || !password || !phoneNo || !type || !address) {
     return res.status(400).json({
       success: false,

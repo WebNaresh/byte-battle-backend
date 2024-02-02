@@ -45,7 +45,7 @@ const foodItemSchema = new mongoose.Schema(
       required: true,
     },
     shelfLife: {
-      type: Number,
+      type: Date,
       required: true,
     },
     items: {
