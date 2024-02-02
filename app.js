@@ -16,6 +16,7 @@ app.use("/route", user);
 app.use("/route", foodItem);
 app.use("/route", notification);
 app.get("/", (req, res) => {
+  console.log("home page");
   res.send("Welcome to the homepage!");
 });
 app.use(error);
