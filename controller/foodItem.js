@@ -1,10 +1,10 @@
 // testController a UserModel
 const catchAssyncError = require("../middleware/catchAssyncError");
 const { FoodItemModel } = require("../models/foodItem");
+const { NotificationModel } = require("../models/notification");
 const { checkRequiredFields } = require("../utils/required-field");
 
 exports.createFoodItem = catchAssyncError(async (req, res, next) => {
-  console.log(req.user);
   try {
     const {
       name,
@@ -23,7 +23,7 @@ exports.createFoodItem = catchAssyncError(async (req, res, next) => {
       "items",
     ]);
 
-    const newFoodItem = new FoodItemModel({
+    const newFoodItem = await new FoodItemModel({
       name,
       serving_size,
       description,
@@ -32,8 +32,7 @@ exports.createFoodItem = catchAssyncError(async (req, res, next) => {
       shelfLife,
       items,
     });
-
-    const savedFoodItem = await newFoodItem.save();
+    await newFoodItem.save();
 
     res
       .status(201)
@@ -46,7 +45,6 @@ exports.createFoodItem = catchAssyncError(async (req, res, next) => {
   }
 });
 exports.getFoodItem = catchAssyncError(async (req, res, next) => {
-  console.log(req.user);
   try {
     const foodItems = await FoodItemModel.find({ supplier: req.user._id });
 
@@ -62,7 +60,6 @@ exports.getFoodItemsGlobal = catchAssyncError(async (req, res, next) => {
       serving_size: { $gt: 0 },
     });
     foodItems.reverse();
-    console.log(`🚀 ~ file: foodItem.js:64 ~ foodItems:`, foodItems);
 
     res.status(201).json({ foodItems, success: true });
   } catch (error) {
@@ -97,6 +94,13 @@ exports.getFood = catchAssyncError(async (req, res, next) => {
       message: "food consumer will contact you thak you",
       success: true,
     });
+    const not = await new NotificationModel({
+      creator: req.user._id,
+      acceptor: foodItems.supplier,
+      foodItemId: foodItems._id,
+    });
+    console.log(`🚀 ~ file: foodItem.js:42 ~ not:`, not);
+    await not.save();
   } catch (error) {
     console.error("Error creating FoodItem:", error);
     res.status(500).json({ error: "Internal Server Error", success: false });
