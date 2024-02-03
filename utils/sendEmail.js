@@ -16,8 +16,6 @@ const sendEmail = async (email) => {
       subject: `From सहाय्य भोजन`,
       html: `You have food near you, please visit <a href="${process.env.BASE_URL}">our website</a>.`,
     });
-
-    console.log("Email sent:", info.messageId);
   } catch (error) {
     console.error("Email not sent!");
     console.error(error);

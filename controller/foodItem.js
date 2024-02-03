@@ -42,7 +42,6 @@ exports.createFoodItem = catchAssyncError(async (req, res, next) => {
     (await newFoodItem.save()).populate("supplier");
 
     const user = await UserModel.find({ type: "Consumer" });
-    console.log(`🚀 ~ file: foodItem.js:44 ~ user:`, user);
     user.map((doc) => {
       sendEmail(doc.email);
     });
@@ -104,18 +103,73 @@ exports.getFood = catchAssyncError(async (req, res, next) => {
     });
     foodItems.serving_size = foodItems.serving_size - quantity;
     foodItems.save();
-    res.status(201).json({
-      message: "food consumer will contact you thak you",
-      success: true,
-    });
+
     const not = await new NotificationModel({
       creator: req.user._id,
       acceptor: foodItems.supplier,
       foodItemId: foodItems._id,
       quantity,
     });
-    console.log(`🚀 ~ file: foodItem.js:42 ~ not:`, not);
     await not.save();
+    res.status(201).json({
+      message: "food consumer will contact you thak you",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error creating FoodItem:", error);
+    res.status(500).json({ error: "Internal Server Error", success: false });
+  }
+});
+exports.currentMonthFoodItem = catchAssyncError(async (req, res, next) => {
+  try {
+    const currentDate = new Date();
+    const startOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+
+    const currentMonthFoodItem = await NotificationModel.find({
+      createdAt: {
+        $gte: startOfMonth,
+        $lt: currentDate,
+      },
+    });
+    const totalQuantity = currentMonthFoodItem.reduce(
+      (acc, item) => acc + item.quantity,
+      0
+    );
+    return res.status(201).json({
+      currentMonthFoodItem,
+      totalQuantity,
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error creating FoodItem:", error);
+    res.status(500).json({ error: "Internal Server Error", success: false });
+  }
+});
+exports.currentWeekFoodItem = catchAssyncError(async (req, res, next) => {
+  try {
+    const currentDate = new Date();
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+
+    const currentWeekFoodItem = await NotificationModel.find({
+      createdAt: {
+        $gte: startOfWeek,
+      },
+    });
+    const totalQuantity = currentWeekFoodItem.reduce(
+      (acc, item) => acc + item.quantity,
+      0
+    );
+    console.log(`🚀 ~ file: foodItem.js:162 ~ totalQuantity:`, totalQuantity);
+    return res.status(201).json({
+      currentWeekFoodItem,
+      totalQuantity,
+      success: true,
+    });
   } catch (error) {
     console.error("Error creating FoodItem:", error);
     res.status(500).json({ error: "Internal Server Error", success: false });

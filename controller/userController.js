@@ -11,12 +11,8 @@ exports.test = catchAssyncError(async (req, res, next) => {
 
 exports.register = catchAssyncError(async (req, res, next) => {
   const { name, email, password, phoneNo, type, address } = req.body;
-  console.log(
-    `🚀 ~ file: userController.js:14 ~ { name, email, password, phoneNo, type, address }:`,
-    { name, email, password, phoneNo, type, address }
-  );
+
   const existed = await UserModel.findOne({ email });
-  console.log(`🚀 ~ file: userController.js:19 ~ existed:`, existed);
   if (!name || !email || !password || !phoneNo || !type || !address) {
     return res.status(400).json({
       success: false,
@@ -47,25 +43,17 @@ exports.register = catchAssyncError(async (req, res, next) => {
 exports.login = catchAssyncError(async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log(`🚀 ~ file: userController.js:44 ~ { email, password } :`, {
-      email,
-      password,
-    });
-    console.log("{ email, password }", { email, password });
 
     // Check if the user with the provided email exists
     const user = await UserModel.findOne({ email });
-    console.log(`🚀 ~ file: userController.js:48 ~ user:`, user);
+
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
     // Compare the provided password with the hashed password in the database
     const isPasswordMatch = await bcrypt.compare(password, user.password);
-    console.log(
-      `🚀 ~ file: userController.js:59 ~ isPasswordMatch:`,
-      isPasswordMatch
-    );
+
     if (!isPasswordMatch) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
